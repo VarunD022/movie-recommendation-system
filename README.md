@@ -8,6 +8,15 @@ A movie recommendation system that suggests personalized films based on user pre
 - **Data Analysis**: Uses machine learning to analyze movie data.
 - **Interactive Interface**: User-friendly interface for easy movie selection.
 
+
+## Screenshots
+
+### Recommendation Result Example 1
+![Recommendation Result Screenshot 1](https://github.com/VarunD022/movie-recommendation-system/blob/main/Result_screenshot_1.png)
+
+### Recommendation Result Example 2
+![Recommendation Result Screenshot 2](https://github.com/VarunD022/movie-recommendation-system/blob/main/Result_screenshot_2.png)
+
 ## Tech Stack
 
 - **Python**: For data processing and model building.
