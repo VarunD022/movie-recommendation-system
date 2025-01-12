@@ -10,7 +10,7 @@ import zipfile
 if not os.path.exists('data'):
     with zipfile.ZipFile('data.zip', 'r') as zip_ref:
         zip_ref.extractall('data')
-        st.write("Extracted data successfully.")
+        st.write(".")
 
 # Load datasets
 movies_file = 'data/tmdb_5000_movies.csv'
