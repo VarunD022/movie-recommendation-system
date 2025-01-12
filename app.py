@@ -45,7 +45,7 @@ cv = CountVectorizer(max_features=5000, stop_words='english')
 vector = cv.fit_transform(movies['tags']).toarray()
 similarity = cosine_similarity(vector)
 
-def recommend(movie, genre_filter=None, language_filter=None, year_range=None):
+def recommend(movie, genre_filter=None):
     movie_index = movies[movies['title'] == movie].index[0]
     distances = similarity[movie_index]
     movie_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:20]
@@ -55,12 +55,6 @@ def recommend(movie, genre_filter=None, language_filter=None, year_range=None):
         movie_data = movies.iloc[i[0]]
         if genre_filter and not any(genre in movie_data['genres'] for genre in genre_filter):
             continue
-        if language_filter and movie_data['original_language'] not in language_filter:
-            continue
-        if year_range:
-            release_year = int(movie_data['release_date'][:4]) if pd.notnull(movie_data['release_date']) else 0
-            if release_year < year_range[0] or release_year > year_range[1]:
-                continue
         recommended_movies.append(movie_data.title)
         if len(recommended_movies) == 5:
             break
@@ -72,15 +66,12 @@ st.title('🎬 Movie Recommendation System')
 
 selected_movie = st.selectbox('Select a movie:', movies['title'].values)
 genres = list(set([g for sublist in movies['genres'] for g in sublist]))
-languages = list(movies['original_language'].unique())
 
 genre_filter = st.multiselect('Filter by Genre:', genres)
-language_filter = st.multiselect('Filter by Language:', languages)
-year_range = st.slider('Filter by Release Year:', min_value=1900, max_value=2025, value=(2000, 2025))
 
 if st.button('Recommend'):
     try:
-        recommendations = recommend(selected_movie, genre_filter, language_filter, year_range)
+        recommendations = recommend(selected_movie, genre_filter)
         st.write('**Top Recommendations:**')
         for movie in recommendations:
             st.write(f"- {movie}")
