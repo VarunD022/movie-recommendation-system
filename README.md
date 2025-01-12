@@ -1,6 +1,6 @@
 # Movie Recommendation System
 
-A movie recommendation system that suggests personalized films based on user preferences and behavior. The system uses machine learning algorithms to analyze data and provide relevant movie suggestions to enhance user experience.
+A movie recommendation system that suggests personalized films based on user preferences and behavior. The system uses machine learning algorithms to analyze data and provide relevant movie suggestions to enhance user experience. You can access the app here : https://movieerecomm.streamlit.app/ 
 
 ## Features
 
