@@ -16,17 +16,19 @@ if not os.path.exists('data'):
 movies_file = 'data/tmdb_5000_movies.csv'
 credits_file = 'data/tmdb_5000_credits.csv'
 
-try:
-    movies = pd.read_csv(movies_file)
-    credits = pd.read_csv(credits_file)
-except FileNotFoundError:
+# Ensure the files exist and can be read
+if not os.path.exists(movies_file) or not os.path.exists(credits_file):
     st.error("CSV files not found. Ensure 'data.zip' contains the required files.")
     st.stop()
+
+# Load the movies and credits data
+movies = pd.read_csv(movies_file)
+credits = pd.read_csv(credits_file)
 
 # Merge datasets
 movies = movies.merge(credits, on='title')
 
-# Data preprocessing
+# Data preprocessing functions
 def convert(obj):
     try:
         return [i['name'] for i in ast.literal_eval(obj)]
@@ -45,8 +47,13 @@ cv = CountVectorizer(max_features=5000, stop_words='english')
 vector = cv.fit_transform(movies['tags']).toarray()
 similarity = cosine_similarity(vector)
 
+# Recommendation function
 def recommend(movie, genre_filter=None):
-    movie_index = movies[movies['title'] == movie].index[0]
+    try:
+        movie_index = movies[movies['title'] == movie].index[0]
+    except IndexError:
+        return []
+
     distances = similarity[movie_index]
     movie_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:20]
     
@@ -72,8 +79,11 @@ genre_filter = st.multiselect('Filter by Genre:', genres)
 if st.button('Recommend'):
     try:
         recommendations = recommend(selected_movie, genre_filter)
-        st.write('**Top Recommendations:**')
-        for movie in recommendations:
-            st.write(f"- {movie}")
+        if recommendations:
+            st.write('**Top Recommendations:**')
+            for movie in recommendations:
+                st.write(f"- {movie}")
+        else:
+            st.write("No recommendations found.")
     except Exception as e:
         st.error(f"An error occurred: {e}")
