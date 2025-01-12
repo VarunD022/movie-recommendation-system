@@ -1,15 +1,32 @@
-import streamlit as st 
+import streamlit as st
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import ast
+import os
+import zipfile
 
-# Load and preprocess data
-movies = pd.read_csv('tmdb_5000_movies.csv')
-credits = pd.read_csv('tmdb_5000_credits.csv')
+# Extract data.zip if not already extracted
+if not os.path.exists('data'):
+    with zipfile.ZipFile('data.zip', 'r') as zip_ref:
+        zip_ref.extractall('data')
+        st.write("Extracted data successfully.")
+
+# Load datasets
+movies_file = 'data/tmdb_5000_movies.csv'
+credits_file = 'data/tmdb_5000_credits.csv'
+
+try:
+    movies = pd.read_csv(movies_file)
+    credits = pd.read_csv(credits_file)
+except FileNotFoundError:
+    st.error("CSV files not found. Ensure 'data.zip' contains the required files.")
+    st.stop()
+
+# Merge datasets
 movies = movies.merge(credits, on='title')
 
-# Data Preprocessing
+# Data preprocessing
 def convert(obj):
     try:
         return [i['name'] for i in ast.literal_eval(obj)]
@@ -23,6 +40,7 @@ movies['crew'] = movies['crew'].apply(lambda x: [i['name'] for i in ast.literal_
 movies['overview'] = movies['overview'].fillna('')
 movies['tags'] = movies['overview'] + movies['genres'].apply(lambda x: ' '.join(x)) + movies['keywords'].apply(lambda x: ' '.join(x)) + movies['cast'].apply(lambda x: ' '.join(x)) + movies['crew'].apply(lambda x: ' '.join(x))
 
+# Vectorization
 cv = CountVectorizer(max_features=5000, stop_words='english')
 vector = cv.fit_transform(movies['tags']).toarray()
 similarity = cosine_similarity(vector)
@@ -39,7 +57,10 @@ st.title('🎬 Movie Recommendation System')
 selected_movie = st.selectbox('Select a movie:', movies['title'].values)
 
 if st.button('Recommend'):
-    recommendations = recommend(selected_movie)
-    st.write('**Top Recommendations:**')
-    for movie in recommendations:
-        st.write(f"- {movie}")
+    try:
+        recommendations = recommend(selected_movie)
+        st.write('**Top Recommendations:**')
+        for movie in recommendations:
+            st.write(f"- {movie}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
