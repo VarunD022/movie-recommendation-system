@@ -42,7 +42,7 @@ vector = cv.fit_transform(movies['tags']).toarray()
 # Cosine similarity
 similarity = cosine_similarity(vector)
 
-def recommend(movie, genre_filter=None, language_filter=None, year_range=None):
+def recommend(movie, genre_filter=None):
     movie_index = movies[movies['title'] == movie].index[0]
     distances = similarity[movie_index]
     movie_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:20]
@@ -52,12 +52,6 @@ def recommend(movie, genre_filter=None, language_filter=None, year_range=None):
         movie_data = movies.iloc[i[0]]
         if genre_filter and not any(genre in movie_data['genres'] for genre in genre_filter):
             continue
-        if language_filter and movie_data['original_language'] not in language_filter:
-            continue
-        if year_range:
-            release_year = int(movie_data['release_date'][:4]) if pd.notnull(movie_data['release_date']) else 0
-            if release_year < year_range[0] or release_year > year_range[1]:
-                continue
         recommended_movies.append(movie_data.title)
         if len(recommended_movies) == 5:
             break
@@ -65,6 +59,6 @@ def recommend(movie, genre_filter=None, language_filter=None, year_range=None):
 
 # Example usage
 if __name__ == "__main__":
-    print("Recommendations for 'The Dark Knight':", recommend('The Dark Knight', genre_filter=['Action'], year_range=(2000, 2020)))
-    print("Recommendations for 'Inception':", recommend('Inception', language_filter=['en'], year_range=(2010, 2020)))
+    print("Recommendations for 'The Dark Knight':", recommend('The Dark Knight', genre_filter=['Action']))
+    print("Recommendations for 'Inception':", recommend('Inception', genre_filter=['Action']))
     print("Recommendations for 'Interstellar':", recommend('Interstellar'))
