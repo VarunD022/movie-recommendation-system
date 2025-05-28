@@ -10,8 +10,11 @@ st.header("📌 Recommend Movies by Title")
 selected_movie = st.selectbox("Choose a movie", main.get_all_movies())
 selected_genres = st.multiselect("Filter by genre (optional)", main.get_all_genres())
 
+# Year slider
+selected_years = st.slider("Filter by release year", 1995, 2020, (2010, 2020))
+
 if st.button("Recommend"):
-    recommendations = main.recommend(selected_movie, selected_genres)
+    recommendations = main.recommend(selected_movie, selected_genres, selected_years)
     if recommendations:
         st.subheader("🎥 Recommended Movies:")
         for title, director in recommendations:
