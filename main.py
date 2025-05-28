@@ -4,7 +4,6 @@ import os
 import zipfile
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import random
 
 # Extract data.zip if not already extracted
 if not os.path.exists('data'):
@@ -21,7 +20,7 @@ credits = pd.read_csv(credits_file)
 # Merge on title
 movies = movies.merge(credits, on='title')
 
-# Data preprocessing
+# Parse and clean genres, keywords, cast, crew
 def convert(obj):
     try:
         return [i['name'] for i in ast.literal_eval(obj)]
@@ -34,7 +33,11 @@ movies['cast'] = movies['cast'].apply(lambda x: [i['name'] for i in ast.literal_
 movies['crew'] = movies['crew'].apply(lambda x: [i['name'] for i in ast.literal_eval(x) if i['job'] == 'Director'] if pd.notnull(x) else [])
 movies['overview'] = movies['overview'].fillna('')
 
-# Create tags column for recommendations
+# Parse release dates and extract year
+movies['release_date'] = pd.to_datetime(movies['release_date'], errors='coerce')
+movies['year'] = movies['release_date'].dt.year.fillna(0).astype(int)
+
+# Create tags column
 movies['tags'] = movies['overview'] + ' ' + \
                  movies['genres'].apply(lambda x: ' '.join(x)) + ' ' + \
                  movies['keywords'].apply(lambda x: ' '.join(x)) + ' ' + \
@@ -46,8 +49,8 @@ cv = CountVectorizer(max_features=5000, stop_words='english')
 vector = cv.fit_transform(movies['tags']).toarray()
 similarity = cosine_similarity(vector)
 
-# Recommendation by title + optional genre
-def recommend(movie, genre_filter=None):
+# Recommendation by title + optional genre + optional year range
+def recommend(movie, genre_filter=None, year_range=None):
     try:
         movie_index = movies[movies['title'] == movie].index[0]
     except IndexError:
@@ -60,6 +63,8 @@ def recommend(movie, genre_filter=None):
     for i in movie_list:
         movie_data = movies.iloc[i[0]]
         if genre_filter and not any(g in movie_data['genres'] for g in genre_filter):
+            continue
+        if year_range and not (year_range[0] <= movie_data['year'] <= year_range[1]):
             continue
         recommended.append((movie_data.title, ', '.join(movie_data.crew)))
         if len(recommended) == 5:
@@ -83,3 +88,5 @@ def get_all_movies():
 
 def get_all_genres():
     return sorted(set([genre for sublist in movies['genres'] for genre in sublist]))
+
+__all__ = ['recommend', 'surprise_me', 'search_by_person', 'get_all_movies', 'get_all_genres', 'movies']
