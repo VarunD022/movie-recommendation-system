@@ -9,8 +9,6 @@ st.title("🎬 Movie Recommendation System")
 st.header("📌 Recommend Movies by Title")
 selected_movie = st.selectbox("Choose a movie", main.get_all_movies())
 selected_genres = st.multiselect("Filter by genre (optional)", main.get_all_genres())
-
-# Year slider
 selected_years = st.slider("Filter by release year", 1995, 2020, (2010, 2020))
 
 if st.button("Recommend"):
@@ -42,3 +40,15 @@ if person:
             st.markdown(f"**{title}** — 🎬 Director(s): {director}")
     else:
         st.warning("No movies found for the given name.")
+
+# Section 4: Mood-Based Recommendation
+st.header("🧠 Let Us Know Your Mood [AI]")
+mood_input = st.text_input("Type how you're feeling or what you want to watch")
+if st.button("Find Movies"):
+    mood_recommendations = main.recommend_by_mood(mood_input)
+    if mood_recommendations:
+        st.subheader("🎯 Based on your mood, we suggest:")
+        for title, director in mood_recommendations:
+            st.markdown(f"**{title}** — 🎬 Director(s): {director}")
+    else:
+        st.warning("No matching movies found for your mood.")
